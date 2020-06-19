@@ -1,4 +1,6 @@
 import bpy
+from . import addon_updater_ops
+
 import os
 import sys
 from pathlib import Path
@@ -10,7 +12,7 @@ import json
 import ensurepip
 import datetime
 import shutil
-from . import addon_updater_ops
+
 
 #ensurepip.bootstrap()
 pybin = bpy.app.binary_path_python
@@ -234,7 +236,7 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 		if bpy.context.scene.my_enum_items.la_ex == '':
 			layout.operator("ccat.copylatf")
 
-
+@addon_updater_ops.make_annotations
 class CCAT_PT_PrefPanel(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
@@ -312,24 +314,38 @@ class CCAT_PT_PrefPanel(bpy.types.AddonPreferences):
 		addon_updater_ops.update_settings_ui(self,context)
 
 
+
+classes = (
+	MyEnumItems,
+	OT_copylatf,
+	CCAT_PT_PrimPanel,
+	CCAT_PT_PrefPanel,
+	OT_write,
+	OT_TestOP
+)
+
+
 def register():
+	# addon updater code and configurations
+	# in case of broken version, try to register the updater first
+	# so that users can revert back to a working version
 	addon_updater_ops.register(bl_info)
-	
-	bpy.utils.register_class(MyEnumItems)
-	bpy.utils.register_class(OT_copylatf)
-	bpy.utils.register_class(CCAT_PT_PrimPanel)
-	bpy.utils.register_class(CCAT_PT_PrefPanel)
-	bpy.utils.register_class(OT_write)
-	bpy.utils.register_class(OT_TestOP)
+
+	# register the example panel, to show updater buttons
+	for cls in classes:
+		addon_updater_ops.make_annotations(cls) # to avoid blender 2.8 warnings
+		bpy.utils.register_class(cls)
 
 
 def unregister():
-	bpy.utils.unregister_class(MyEnumItems)
-	bpy.utils.unregister_class(CCAT_PT_PrimPanel)
-	bpy.utils.unregister_class(CCAT_PT_PrefPanel)
-	bpy.utils.unregister_class(OT_TestOP)
-	bpy.utils.unregister_class(OT_write)
-	bpy.utils.unregister_class(OT_copylatf)
+	# addon updater unregister
+	addon_updater_ops.unregister()
+
+	# register the example panel, to show updater buttons
+	for cls in reversed(classes):
+		bpy.utils.unregister_class(cls)
+
+
 
 if __name__ == "__main__":
 	register()
