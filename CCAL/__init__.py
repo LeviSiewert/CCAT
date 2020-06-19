@@ -20,7 +20,7 @@ import openpyxl
 bl_info = {
 	"name": "CCAL",
 	"author": "Your Name Here",
-	"version": (1, 0),
+	"version": (0, 4),
 	"blender": (2, 80, 0),
 	"location": "View3D > Add > Mesh > New Object",
 	"description": "Adds a new Mesh Object",
