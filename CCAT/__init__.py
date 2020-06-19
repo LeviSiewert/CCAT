@@ -1,6 +1,36 @@
-import bpy
-from . import addon_updater_ops
+# ##### BEGIN GPL LICENSE BLOCK #####
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software Foundation,
+#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+#
+# ##### END GPL LICENSE BLOCK #####
 
+bl_info = {
+	"name":        "CCAT",
+	"description": "Crow Creations Tracking addon",
+	"author":      "Levi Siewert",
+	"version":     (0, 4),
+	"blender":     (2, 80, 0),
+	"location":    "View 3D > Tool Shelf > CCAT",
+	"warning":     "",  # used for warning icon and text in addons panel
+	"wiki_url":    "https://github.com/LeviSiewert/CCAT",
+	"tracker_url": "https://github.com/LeviSiewert/CCAT/issues",
+	"category":    "System"
+	}
+
+
+import bpy
 import os
 import sys
 from pathlib import Path
@@ -20,17 +50,8 @@ subprocess.check_call([pybin, '-m', 'pip', 'install', 'openpyxl'])
 
 import openpyxl
 
-bl_info = {
-	"name": "CCAT",
-	"author": "Your Name Here",
-	"version": (0, 4),
-	"blender": (2, 80, 0),
-	"location": "View3D > Add > Mesh > New Object",
-	"description": "Adds a new Mesh Object",
-	"warning": "",
-	"doc_url": "",
-	"category": "Add Mesh"}
-#fun/op that copies and phastes latf excel + json to folder path if 
+# updater ops import, all setup in this file
+from . import addon_updater_ops
 
 
 class MyEnumItems(bpy.types.PropertyGroup):
@@ -59,6 +80,44 @@ class MyEnumItems(bpy.types.PropertyGroup):
 		default = "",
 		description = "Place the prop overview excel file Here",
 		subtype = "FILE_PATH")
+class OBJECT_PT_DemoUpdaterPanel(bpy.types.Panel):
+	"""Panel to demo popup notice and ignoring functionality"""
+	bl_label = "Updater Demo Panel"
+	bl_idname = "OBJECT_PT_hello"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'TOOLS' if bpy.app.version < (2, 80) else 'UI'
+	bl_context = "objectmode"
+	bl_category = "Tools"
+
+	def draw(self, context):
+		layout = self.layout
+
+		# Call to check for update in background
+		# note: built-in checks ensure it runs at most once
+		# and will run in the background thread, not blocking
+		# or hanging blender
+		# Internally also checks to see if auto-check enabled
+		# and if the time interval has passed
+		addon_updater_ops.check_for_update_background()
+
+
+		layout.label(text="Demo Updater Addon")
+		layout.label(text="")
+
+		col = layout.column()
+		col.scale_y = 0.7
+		col.label(text="If an update is ready,")
+		col.label(text="popup triggered by opening")
+		col.label(text="this panel, plus a box ui")
+
+		# could also use your own custom drawing
+		# based on shared variables
+		if addon_updater_ops.updater.update_ready == True:
+			layout.label(text="Custom update message", icon="INFO")
+		layout.label(text="")
+
+		# call built-in function with draw code/checks
+		addon_updater_ops.update_notice_box_ui(self, context)
 
 class OT_copylatf(bpy.types.Operator):
 	bl_label = "Create New LATF file"
@@ -217,7 +276,6 @@ class OT_write(bpy.types.Operator):
 
 		return{'FINISHED'}
 
-
 class CCAT_PT_PrimPanel(bpy.types.Panel):
 	bl_label = "Crown Creations"
 	bl_idname = "CCAT_PT_PrimPanel"
@@ -236,67 +294,70 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 		if bpy.context.scene.my_enum_items.la_ex == '':
 			layout.operator("ccat.copylatf")
 
+
+
+
 @addon_updater_ops.make_annotations
 class CCAT_PT_PrefPanel(bpy.types.AddonPreferences):
-	bl_idname = __name__
+	"""Demo bare-bones preferences"""
+	bl_idname = __package__
+
+	# addon updater preferences
 
 	auto_check_update = bpy.props.BoolProperty(
-		name = "Auto-check for Update",
-		description = "If enabled, auto-check for updates using an interval",
-		default = False,
-	)
-#pref auto update values
+		name="Auto-check for Update",
+		description="If enabled, auto-check for updates using an interval",
+		default=False,
+		)
 	updater_intrval_months = bpy.props.IntProperty(
 		name='Months',
-		description = "Number of months between checking for updates",
+		description="Number of months between checking for updates",
 		default=0,
 		min=0
-	)
+		)
 	updater_intrval_days = bpy.props.IntProperty(
 		name='Days',
-		description = "Number of days between checking for updates",
+		description="Number of days between checking for updates",
 		default=7,
 		min=0,
-	)
+		max=31
+		)
 	updater_intrval_hours = bpy.props.IntProperty(
 		name='Hours',
-		description = "Number of hours between checking for updates",
+		description="Number of hours between checking for updates",
 		default=0,
 		min=0,
 		max=23
-	)
+		)
 	updater_intrval_minutes = bpy.props.IntProperty(
 		name='Minutes',
-		description = "Number of minutes between checking for updates",
+		description="Number of minutes between checking for updates",
 		default=0,
 		min=0,
 		max=59
-	)
-#regular values
+		)
+	
+	#my preferences
 	ao_ex: StringProperty(
 		name = "Asset overview Excel File",
 		default = os.path.splitdrive(__file__)[0],
 		description = "Place the Asset overview excel file Here",
 		subtype = "FILE_PATH")
-
 	car_ex: StringProperty(
 		name = "Car overview Excel File",
 		default = os.path.splitdrive(__file__)[0],
 		description = "Place the Car overview excel file Here",
-		subtype = "FILE_PATH")
-	
+		subtype = "FILE_PATH")	
 	char_ex: StringProperty(
 		name = "Character overview Excel File",
 		default = os.path.splitdrive(__file__)[0],
 		description = "Place the Character overview excel file Here",
 		subtype = "FILE_PATH")
-
 	prop_ex: StringProperty(
 		name = "prop overview Excel File",
 		default = os.path.splitdrive(__file__)[0],
 		description = "Place the prop overview excel file Here",
 		subtype = "FILE_PATH")
-
 	artistname: StringProperty(
 		name = "Artist Name:",
 		default = '',
@@ -304,24 +365,41 @@ class CCAT_PT_PrefPanel(bpy.types.AddonPreferences):
 
 	def draw(self, context):
 		layout = self.layout
-		col = layout.column()
+
+		# works best if a column, or even just self.layout
+		mainrow = layout.row()
+		col = mainrow.column()
 		col.prop(self, "ao_ex", text="Asset Overview Excel File")
 		col.prop(self, "car_ex", text="Car Overview Excel File")
 		col.prop(self, "char_ex", text="Character Overview Excel File")
 		col.prop(self, "prop_ex", text="Prop Overview Excel File")
 		col.prop(self, "artistname", text="Artist Name")
+		# updater draw function
+		# could also pass in col as third arg
+		addon_updater_ops.update_settings_ui(self, context)
 
-		addon_updater_ops.update_settings_ui(self,context)
+		# Alternate draw function, which is more condensed and can be
+		# placed within an existing draw function. Only contains:
+		#   1) check for update/update now buttons
+		#   2) toggle for auto-check (interval will be equal to what is set above)
+		# addon_updater_ops.update_settings_ui_condensed(self, context, col)
 
+		# Adding another column to help show the above condensed ui as one column
+		# col = mainrow.column()
+		# col.scale_y = 2
+		# col.operator("wm.url_open","Open webpage ").url=addon_updater_ops.updater.website
 
 
 classes = (
+	#DemoPreferences,
+	OBJECT_PT_DemoUpdaterPanel,
 	MyEnumItems,
 	OT_copylatf,
 	CCAT_PT_PrimPanel,
 	CCAT_PT_PrefPanel,
 	OT_write,
 	OT_TestOP
+
 )
 
 
@@ -344,9 +422,3 @@ def unregister():
 	# register the example panel, to show updater buttons
 	for cls in reversed(classes):
 		bpy.utils.unregister_class(cls)
-
-
-
-if __name__ == "__main__":
-	register()
-	
