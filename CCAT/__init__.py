@@ -19,7 +19,7 @@ subprocess.check_call([pybin, '-m', 'pip', 'install', 'openpyxl'])
 import openpyxl
 
 bl_info = {
-	"name": "CCAL",
+	"name": "CCAT",
 	"author": "Your Name Here",
 	"version": (0, 4),
 	"blender": (2, 80, 0),
@@ -60,7 +60,7 @@ class MyEnumItems(bpy.types.PropertyGroup):
 
 class OT_copylatf(bpy.types.Operator):
 	bl_label = "Create New LATF file"
-	bl_idname= "ccal.copylatf"
+	bl_idname= "ccat.copylatf"
 	
 	def execute(self, context):
 		#pref = bpy.context.preferences.addons[__name__].preferences
@@ -69,13 +69,13 @@ class OT_copylatf(bpy.types.Operator):
 		for i in copyflnamelist:
 			filepath = (bpy.utils.user_resource('SCRIPTS', "addons") + "\\"+__name__+ "\\"+"bin"+"\\"+i)
 			filedest = os.path.dirname(bpy.context.blend_data.filepath)
-			print ("ccal: copying", i ,"from bin to file location")
+			print ("ccat: copying", i ,"from bin to file location")
 			shutil.copy2(filepath,filedest)
 		return {'FINISHED'}
 
 class OT_TestOP(bpy.types.Operator):
 	bl_label = "test operation"
-	bl_idname= "ccal.testop"
+	bl_idname= "ccat.testop"
 	
 	def execute(self, context):
 		#pref = bpy.context.preferences.addons[__name__].preferences
@@ -104,7 +104,7 @@ def cellinfo (col, min, max, sheet):
 	return cell_dic    
 
 class OT_write(bpy.types.Operator):
-	bl_idname = "ccal.write"
+	bl_idname = "ccat.write"
 	bl_label = "get variables from name"
 
 	#call this to assign variables to the scene 
@@ -171,12 +171,12 @@ class OT_write(bpy.types.Operator):
 			for i in aofplist:
 
 				if os.path.isdir(i):
-					msgbox("Error: preferences points to directory not excel file", "CCAL Plugin", 'ERROR')
+					msgbox("Error: preferences points to directory not excel file", "CCAT Plugin", 'ERROR')
 					print("Error: preferences points to directory not excel file")
 					continue
 
 				if i.lower().endswith(".xlsx") == False:
-					msgbox("Error: preferences points to" + bpy.path.basename(i) + "which is not a excel file", "CCAL Plugin", 'ERROR')
+					msgbox("Error: preferences points to" + bpy.path.basename(i) + "which is not a excel file", "CCAT Plugin", 'ERROR')
 					print ("Error: preferences points to" + bpy.path.basename(i) + "which is not a excel file")
 					continue
 				#bug here. runs all code even after continue is suppost to jump to next itteration
@@ -207,10 +207,10 @@ class OT_write(bpy.types.Operator):
 					print("ccal: printed to", aofplist , "at row", row)
 					break
 				else:
-					print ("ccal: Did not find cell in", i)
+					print ("ccat: Did not find cell in", i)
 					
 		else:
-			print("ccal: scene file, not yet supported")
+			print("ccat: scene file, not yet supported")
 			#this file is a scene file, run checks for scene files
 
 		return{'FINISHED'}
@@ -232,10 +232,10 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 		layout.prop(context.scene.my_enum_items, "sofenum")
 		layout.prop(context.scene.my_enum_items, "la_ex", text="local Asset excel")
 		if bpy.context.scene.my_enum_items.la_ex == '':
-			layout.operator("ccal.copylatf")
+			layout.operator("ccat.copylatf")
 
 
-class CCAL_PT_PrefPanel(bpy.types.AddonPreferences):
+class CCAT_PT_PrefPanel(bpy.types.AddonPreferences):
 	bl_idname = __name__
 
 	auto_check_update = bpy.props.BoolProperty(
@@ -318,7 +318,7 @@ def register():
 	bpy.utils.register_class(MyEnumItems)
 	bpy.utils.register_class(OT_copylatf)
 	bpy.utils.register_class(CCAT_PT_PrimPanel)
-	bpy.utils.register_class(CCAL_PT_PrefPanel)
+	bpy.utils.register_class(CCAT_PT_PrefPanel)
 	bpy.utils.register_class(OT_write)
 	bpy.utils.register_class(OT_TestOP)
 
@@ -326,7 +326,7 @@ def register():
 def unregister():
 	bpy.utils.unregister_class(MyEnumItems)
 	bpy.utils.unregister_class(CCAT_PT_PrimPanel)
-	bpy.utils.unregister_class(CCAL_PT_PrefPanel)
+	bpy.utils.unregister_class(CCAT_PT_PrefPanel)
 	bpy.utils.unregister_class(OT_TestOP)
 	bpy.utils.unregister_class(OT_write)
 	bpy.utils.unregister_class(OT_copylatf)
