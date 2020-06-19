@@ -10,6 +10,7 @@ import json
 import ensurepip
 import datetime
 import shutil
+from . import addon_updater_ops
 
 #ensurepip.bootstrap()
 pybin = bpy.app.binary_path_python
@@ -236,6 +237,39 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 
 class CCAL_PT_PrefPanel(bpy.types.AddonPreferences):
 	bl_idname = __name__
+	auto_check_update = bpy.props.BoolProperty(
+		name = "Auto-check for Update",
+		description = "If enabled, auto-check for updates using an interval",
+		default = False,
+	)
+#pref auto update values
+	updater_intrval_months = bpy.props.IntProperty(
+		name='Months',
+		description = "Number of months between checking for updates",
+		default=0,
+		min=0
+	)
+	updater_intrval_days = bpy.props.IntProperty(
+		name='Days',
+		description = "Number of days between checking for updates",
+		default=7,
+		min=0,
+	)
+	updater_intrval_hours = bpy.props.IntProperty(
+		name='Hours',
+		description = "Number of hours between checking for updates",
+		default=0,
+		min=0,
+		max=23
+	)
+	updater_intrval_minutes = bpy.props.IntProperty(
+		name='Minutes',
+		description = "Number of minutes between checking for updates",
+		default=0,
+		min=0,
+		max=59
+	)
+#regular values
 	ao_ex: StringProperty(
 		name = "Asset overview Excel File",
 		default = os.path.splitdrive(__file__)[0],
@@ -274,7 +308,12 @@ class CCAL_PT_PrefPanel(bpy.types.AddonPreferences):
 		col.prop(self, "prop_ex", text="Prop Overview Excel File")
 		col.prop(self, "artistname", text="Artist Name")
 
+		addon_updater_ops.update_settings_ui(self,context)
+
+
 def register():
+	addon_updater_ops.register(bl_info)
+	
 	bpy.utils.register_class(MyEnumItems)
 	bpy.utils.register_class(OT_copylatf)
 	bpy.utils.register_class(CCAT_PT_PrimPanel)
