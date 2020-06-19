@@ -20,7 +20,7 @@ bl_info = {
 	"name":        "CCAT",
 	"description": "Crow Creations Tracking addon",
 	"author":      "Levi Siewert",
-	"version":     (0, 4),
+	"version":     (0, 4, 1),
 	"blender":     (2, 80, 0),
 	"location":    "View 3D > Tool Shelf > CCAT",
 	"warning":     "",  # used for warning icon and text in addons panel
