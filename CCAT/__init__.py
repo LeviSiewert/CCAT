@@ -287,7 +287,6 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 	
 	def draw(self, context):
 		layout = self.layout
-		#layout.prop(context.scene.my_enum_items, "atypeenum")
 		layout.prop(context.scene.my_enum_items, "teamenum")
 		layout.prop(context.scene.my_enum_items, "sofenum")
 		layout.prop(context.scene.my_enum_items, "la_ex", text="local Asset excel")
