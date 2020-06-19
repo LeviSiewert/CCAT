@@ -57,7 +57,7 @@ except Exception as e:
 # Must declare this before classes are loaded
 # otherwise the bl_idname's will not match and have errors.
 # Must be all lowercase and no spaces
-updater.addon = "addon_updater_demo"
+updater.addon = "CCAL"
 
 
 # -----------------------------------------------------------------------------
@@ -1332,15 +1332,15 @@ def register(bl_info):
 	updater.private_token = None # "tokenstring"
 
 	# choose your own username, must match website (not needed for GitLab)
-	updater.user = "cgcookie"
+	updater.user = "LeviSiewert"
 
 	# choose your own repository, must match git name
-	updater.repo = "blender-addon-updater"
+	updater.repo = "CCAT"
 
 	#updater.addon = # define at top of module, MUST be done first
 
 	# Website for manual addon download, optional but recommended to set
-	updater.website = "https://github.com/CGCookie/blender-addon-updater/"
+	updater.website = "https://github.com/LeviSiewert/CCAT/"
 
 	# Addon subfolder path
 	# "sample/path/to/addon"

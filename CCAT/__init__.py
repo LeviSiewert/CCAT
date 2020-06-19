@@ -237,6 +237,7 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 
 class CCAL_PT_PrefPanel(bpy.types.AddonPreferences):
 	bl_idname = __name__
+
 	auto_check_update = bpy.props.BoolProperty(
 		name = "Auto-check for Update",
 		description = "If enabled, auto-check for updates using an interval",
