@@ -352,7 +352,7 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 	bl_idname = "CCAT_PT_PrimPanel"
 	bl_space_type = "VIEW_3D"   
 	bl_region_type = "UI"
-	bl_category = "simple panel"
+	bl_category = "Crown Creations"
 	bl_context = "objectmode"
 	
 	
@@ -371,6 +371,13 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 			
 			layout.operator("ccat.copylatf")
 
+		addon_updater_ops.check_for_update_background()
+		
+		if addon_updater_ops.updater.update_ready == True:
+			layout.label(text="Custom update message", icon="INFO")
+		layout.label(text="")
+
+		addon_updater_ops.update_notice_box_ui(self, context)
 
 
 @addon_updater_ops.make_annotations
@@ -472,7 +479,7 @@ def writeonsave(self, context):
 
 classes = (
 	#DemoPreferences,
-	OBJECT_PT_DemoUpdaterPanel,
+	#OBJECT_PT_DemoUpdaterPanel,
 	MyEnumItems,
 	OT_write,
 	OT_copylatf,
