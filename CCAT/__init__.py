@@ -221,17 +221,28 @@ class OT_write(bpy.types.Operator):
 				latfexcel = openpyxl.load_workbook(bpy.path.abspath(latfexcelloc))
 				latfsheet = latfexcel.active
 
-				#if : #make nested lists and turn this into a for loop
-				latfsheet.insert_rows(8)
-				latfsheet[latfjson["dat"]] = datetime.datetime.now()
-				latfsheet[latfjson["fname"]] =  bpy.path.basename(bpy.context.blend_data.filepath)
-				latfsheet[latfjson["artist"]] = pref.artistname
-				latfsheet[latfjson["sof"]] = bpy.context.scene.my_enum_items.sofenum
-				latfsheet[latfjson["team"]] = vteam
-				latfsheet[latfjson["vnum"]] = vvnum 
-				latfsheet[latfjson["sof"+vteam]] = bpy.context.scene.my_enum_items.sofenum
+				varnestedlist = [
+				["dat" , datetime.datetime.now()],
+				["fname" ,  bpy.path.basename(bpy.context.blend_data.filepath)],
+				["artist" , pref.artistname],
+				["sof" , bpy.context.scene.my_enum_items.sofenum],
+				["team" , vteam],
+				["vnum" , vvnum ],
+				["sof"+vteam , bpy.context.scene.my_enum_items.sofenum]]
+
+				for i in varnestedlist:
+					i.append(latfsheet[latfjson[i[0]]].value == i[1])
+
+				if not all([varnestedlist[1][2], varnestedlist[3][2], varnestedlist[4][2]]):
+					latfsheet.insert_rows(8)
+					for i in varnestedlist:
+						latfsheet[latfjson[i[0]]] = i [1]
+						
+				else:
+					print("CCAT: Not sufficient change to warrent latf log")
 
 				latfexcel.save(bpy.path.abspath(latfexcelloc))
+				
 				latfexcel.close()
 				
 			else:
@@ -405,7 +416,6 @@ class CCAT_PT_PrefPanel(bpy.types.AddonPreferences):
 
 @persistent
 def writeonsave(self, context):
-	print("script test function has been called")
 	return {bpy.ops.ccat.write()}
 	#throwing '''TypeError: unhashable type: 'set'''' for some reason, but it works
 
