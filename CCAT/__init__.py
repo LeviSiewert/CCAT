@@ -43,13 +43,33 @@ import json
 import ensurepip
 import datetime
 import shutil
+import ctypes
 
+def msgbox(message="", title="Message Box", icon= 'INFO'):
+	def draw(self, context):
+		self.layout.label(text=message)
+	bpy.context.window_manager.popup_menu(draw, title = title, icon = icon)
 
-#ensurepip.bootstrap()
-pybin = bpy.app.binary_path_python
-subprocess.check_call([pybin, '-m', 'pip', 'install', 'openpyxl'])
+def isAdmin():
+    try:
+        is_admin = (os.getuid() == 0)
+    except AttributeError:
+        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+    return is_admin
 
-import openpyxl
+try:
+	import openpyxl
+
+except ImportError:
+	print("import openpyxl error, attempting install")
+	if isAdmin() == True:
+		pybin = bpy.app.binary_path_python
+		subprocess.check_call([pybin, '-m', 'pip', 'install', 'openpyxl'])
+		import openpyxl
+	else:
+		msgbox("CCAT dependancy check failed, run blender as Administrator once to solve", "CCAT Plugin Error", "ERROR")
+		print("import module error, requires to run as admin")
+
 
 # updater ops import, all setup in this file
 from . import addon_updater_ops
