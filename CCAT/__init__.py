@@ -172,12 +172,22 @@ def msgbox(message="", title="Message Box", icon= 'INFO'):
 	bpy.context.window_manager.popup_menu(draw, title = title, icon = icon)
 
 def cellinfo (col, min, max, sheet):
-	#returns a library of the ranges defined w/  the values as keys in lowercase
+	#returns a library of the ranges defined w/  the values as keys in lowercase, 
+	# planned: breaks after 5 open spaces
 	cell_dic = {}
 	rangevalues = []
-	
+	count = 0 
+
 	for i in range(min,max):
-		rangevalues.append(col + str(i))
+		if sheet[col + str(i)].value != None:
+			rangevalues.append(col + str(i))
+		else:
+			print("did not find cell info at",(col + str(i)))
+			count += 1
+		if count == 5:
+			print ("counter limit has been reached")
+			break
+		
 	print (rangevalues[-1])
 	for b in rangevalues:
 		print 
@@ -303,7 +313,7 @@ class OT_write(bpy.types.Operator):
 				else:
 					col = (str(aojson["id"]))[0]
 				
-				celldic = cellinfo(col,int((str(aojson["id"]))[1:]), 300, aosheet, vatype)
+				celldic = cellinfo(col,int((str(aojson["id"]))[1:]), 999, aosheet)
 					#required: dynamic upper limit based on break of 3-5 empty cells
 					#current problem: celldic only returns asset, doesnt support masset, change collum
 
@@ -313,12 +323,10 @@ class OT_write(bpy.types.Operator):
 					
 					aoexcel.save(bpy.path.abspath(i))
 					aoexcel.close()
-					print("ccal: printed to", aofplist , "at row", row)
+					print("ccat: printed to", bpy.path.abspath(i), "at row", row)
 					break
 				elif vatype.lower() == "masset" and vid in celldic:
 					aosheet[(str(aojson["sofla"]))[0] + row] = bpy.context.scene.my_enum_items.sofenum
-					
-
 				else:
 					print ("ccat: Did not find cell in", i)
 					aoexcel.close()
