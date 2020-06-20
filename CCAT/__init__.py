@@ -51,11 +51,11 @@ def msgbox(message="", title="Message Box", icon= 'INFO'):
 	bpy.context.window_manager.popup_menu(draw, title = title, icon = icon)
 
 def isAdmin():
-    try:
-        is_admin = (os.getuid() == 0)
-    except AttributeError:
-        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-    return is_admin
+	try:
+		is_admin = (os.getuid() == 0)
+	except AttributeError:
+		is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+	return is_admin
 
 try:
 	import openpyxl
@@ -84,14 +84,15 @@ class MyEnumItems(bpy.types.PropertyGroup):
 	def unregister(cls):
 		del bpy.types.Scene.my_enum_items
 
+
 	sofenum : bpy.props.EnumProperty(
 		name="S.O.F.",
 		description="sofenum",
 		items = (("def",",",""),("wip","W.I.P.","Work In Progress"),("blockout","Blockout","ye its a blockout"),("polish","Polishing","Polishing BB"),("prog","Progressive","PRogressivly working on and updateing model")),)
 	teamenum : bpy.props.EnumProperty(
 		name="Team",
-		description = "teamenum",
-		items = (("def",".",""),("mod","Modeling","Modeling Team"),("rig","Rigging","Rigging Team"),("tex","Texturing","Texturing Team"),("anim","Animation","Animation Team"), ("li","Lighting","Lighting Team")))
+		description = "teamenum1",
+		items = (("def","auto",""),("mod","Modeling","Modeling Team"),("rig","Rigging","Rigging Team"),("tex","Texturing","Texturing Team"),("anim","Animation","Animation Team"), ("li","Lighting","Lighting Team")))
 	atypeenum : bpy.props.EnumProperty(
 		name="File Type/layer",
 		description = "File Type/layer",
@@ -101,6 +102,11 @@ class MyEnumItems(bpy.types.PropertyGroup):
 		default = "",
 		description = "Place the prop overview excel file Here",
 		subtype = "FILE_PATH")
+	artistnote: StringProperty(
+		name = "Notes:",
+		default = "",
+		description = "Place the prop overview excel file Here")
+		
 class OBJECT_PT_DemoUpdaterPanel(bpy.types.Panel):
 	"""Panel to demo popup notice and ignoring functionality"""
 	bl_label = "Updater Demo Panel"
@@ -172,8 +178,7 @@ def msgbox(message="", title="Message Box", icon= 'INFO'):
 	bpy.context.window_manager.popup_menu(draw, title = title, icon = icon)
 
 def cellinfo (col, min, max, sheet):
-	#returns a library of the ranges defined w/  the values as keys in lowercase, 
-	# planned: breaks after 5 open spaces
+	#returns a library of the ranges defined w/ the values as keys in lowercase, 
 	cell_dic = {}
 	rangevalues = []
 	count = 0 
@@ -182,15 +187,15 @@ def cellinfo (col, min, max, sheet):
 		if sheet[col + str(i)].value != None:
 			rangevalues.append(col + str(i))
 		else:
-			print("did not find cell info at",(col + str(i)))
+			#print("did not find cell info at",(col + str(i)))
 			count += 1
 		if count == 5:
-			print ("counter limit has been reached")
+			#print ("counter limit has been reached")
 			break
 		
-	print (rangevalues[-1])
+	#print (rangevalues[-1])
 	for b in rangevalues:
-		print 
+		
 		if sheet[b].value == None:
 			continue
 		cell_dic.update({sheet[b].value.lower():b})
@@ -225,7 +230,7 @@ class OT_write(bpy.types.Operator):
 				vtype = filename[1].lower()
 				vclass = filename[2].lower()
 				vvnum = filename[-1].replace('.blend', '')
-				print (vatype, vtype, vclass, vvnum)
+				#print (vatype, vtype, vclass, vvnum)
 			else:
 				#file is not running or finished asset, continue writing process.
 				#replace with assignments to scene variables.
@@ -236,8 +241,8 @@ class OT_write(bpy.types.Operator):
 				vclass = filename[3].lower()
 				vid = filename[4].lower()
 				vvnum = filename[5].replace('.blend', '')
-				print (vteam, vatype, vtype, vclass, vvnum)
-			print (filetype)
+				#print (vteam, vatype, vtype, vclass, vvnum)
+			#print (filetype)
 			
 			latfexcelloc = bpy.context.scene.my_enum_items.la_ex
 			latfexceldir = os.path.dirname(bpy.path.abspath(latfexcelloc))
@@ -258,7 +263,8 @@ class OT_write(bpy.types.Operator):
 				["sof" , bpy.context.scene.my_enum_items.sofenum],
 				["team" , vteam],
 				["vnum" , vvnum ],
-				["sof"+vteam , bpy.context.scene.my_enum_items.sofenum]]
+				["sof"+vteam , bpy.context.scene.my_enum_items.sofenum],
+				["an" , bpy.context.scene.my_enum_items.artistnote ]]
 
 				for i in varnestedlist:
 					i.append(latfsheet[latfjson[i[0]]].value == i[1])
@@ -300,10 +306,10 @@ class OT_write(bpy.types.Operator):
 
 				aoexcel = openpyxl.load_workbook(i)
 				aosheet = aoexcel.active
-				print (bpy.path.basename(i))
+				#print (bpy.path.basename(i))
 				
 				jsonname = (bpy.path.abspath(i)).replace(bpy.path.basename(i),'') + (bpy.path.basename(i)).split(".")[0] + "json.txt"
-				print (jsonname) 
+				#print (jsonname) 
 
 				with open(jsonname) as json_file:
 					aojson = json.load(json_file)
@@ -327,6 +333,10 @@ class OT_write(bpy.types.Operator):
 					break
 				elif vatype.lower() == "masset" and vid in celldic:
 					aosheet[(str(aojson["sofla"]))[0] + row] = bpy.context.scene.my_enum_items.sofenum
+					print("ccat: printed Madata to", bpy.path.abspath(i), "at location", (str(aojson["sofla"]))[0] + row)
+					aoexcel.save(bpy.path.abspath(i))
+					aoexcel.close()
+					break
 				else:
 					print ("ccat: Did not find cell in", i)
 					aoexcel.close()
@@ -348,10 +358,17 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 	
 	def draw(self, context):
 		layout = self.layout
+
+		row = layout.row()
+		row.label(text="Mode: Asset")
+		
 		layout.prop(context.scene.my_enum_items, "teamenum")
 		layout.prop(context.scene.my_enum_items, "sofenum")
-		layout.prop(context.scene.my_enum_items, "la_ex", text="local Asset excel")
+		layout.prop(context.scene.my_enum_items, "la_ex", text="latf")
+		layout.prop(context.scene.my_enum_items, "artistnote", text="Note")
+		
 		if bpy.context.scene.my_enum_items.la_ex == '':
+			
 			layout.operator("ccat.copylatf")
 
 
