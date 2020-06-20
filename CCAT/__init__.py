@@ -36,6 +36,7 @@ import sys
 from pathlib import Path
 from bpy.props import BoolProperty, PointerProperty, \
 	StringProperty, EnumProperty
+from bpy.app.handlers import persistent 
 import os
 import subprocess
 import json
@@ -140,8 +141,10 @@ class OT_TestOP(bpy.types.Operator):
 	
 	def execute(self, context):
 		#pref = bpy.context.preferences.addons[__name__].preferences
-		#print(pref.ao_ex)
-		return {'FINISHED'}
+		print("yeha, test class has been called")
+		
+		#return {'FINISHED'}
+
 
 def msgbox(message="", title="Message Box", icon= 'INFO'):
 	def draw(self, context):
@@ -169,17 +172,16 @@ class OT_write(bpy.types.Operator):
 	bl_label = "get variables from name"
 
 	#call this to assign variables to the scene 
-
 	def execute(self, context):
+		#writeexcel(self, context)
 		basefilename = bpy.path.basename(bpy.context.blend_data.filepath)
 		filename = basefilename.split("_")
 		filedir = os.path.dirname(bpy.context.blend_data.filepath)
 		pref = context.preferences.addons[__name__].preferences
-		latfexcelloc = bpy.context.scene.my_enum_items.la_ex
-		latfexceldir = os.path.dirname(bpy.path.abspath(latfexcelloc))
 
 
-		if filename[0].isdigit() == False:
+
+		if filename[0].isdigit() == False: #checks if file is scene or asset, missing ma support
 			if filename[0].lower() =="r":
 				filetype = "run"
 				#file is running, cancel writing of script
@@ -206,25 +208,36 @@ class OT_write(bpy.types.Operator):
 				vvnum = filename[5].replace('.blend', '')
 				print (vteam, vatype, vtype, vclass, vvnum)
 			print (filetype)
-			#write to latf
-			#need to make this filedir a user assignable variable, and if no file exists dont write
-			print(bpy.path.abspath(latfexceldir + "\\latfjson.txt"))
-			with open(bpy.path.abspath(latfexceldir + "\\latfjson.txt")) as json_file:
-				latfjson = json.load(json_file)
-			latfexcel = openpyxl.load_workbook(bpy.path.abspath(latfexcelloc))
-			latfsheet = latfexcel.active
-			latfsheet.insert_rows(8)
-			latfsheet[latfjson["dat"]] = datetime.datetime.now()
-			latfsheet[latfjson["fname"]] =  bpy.path.basename(bpy.context.blend_data.filepath)
-			latfsheet[latfjson["artist"]] = pref.artistname
-			latfsheet[latfjson["sof"]] = bpy.context.scene.my_enum_items.sofenum
-			latfsheet[latfjson["team"]] = vteam
-			latfsheet[latfjson["vnum"]] = vvnum 
-			latfsheet[latfjson["sof"+vteam]] = bpy.context.scene.my_enum_items.sofenum
+			
+			latfexcelloc = bpy.context.scene.my_enum_items.la_ex
+			latfexceldir = os.path.dirname(bpy.path.abspath(latfexcelloc))
 
-			latfexcel.save(bpy.path.abspath(latfexcelloc))
-			latfexcel.close()
+			
+			#write to latf
+			if not bpy.context.scene.my_enum_items.la_ex == '':
+			#print(bpy.path.abspath(latfexceldir + "\\latfjson.txt"))
+				with open(bpy.path.abspath(latfexceldir + "\\latfjson.txt")) as json_file:
+					latfjson = json.load(json_file)
+				latfexcel = openpyxl.load_workbook(bpy.path.abspath(latfexcelloc))
+				latfsheet = latfexcel.active
+
+				#if : #make nested lists and turn this into a for loop
+				latfsheet.insert_rows(8)
+				latfsheet[latfjson["dat"]] = datetime.datetime.now()
+				latfsheet[latfjson["fname"]] =  bpy.path.basename(bpy.context.blend_data.filepath)
+				latfsheet[latfjson["artist"]] = pref.artistname
+				latfsheet[latfjson["sof"]] = bpy.context.scene.my_enum_items.sofenum
+				latfsheet[latfjson["team"]] = vteam
+				latfsheet[latfjson["vnum"]] = vvnum 
+				latfsheet[latfjson["sof"+vteam]] = bpy.context.scene.my_enum_items.sofenum
+
+				latfexcel.save(bpy.path.abspath(latfexcelloc))
+				latfexcel.close()
+				
+			else:
+				msgbox("Error: no latf excel found, please assign","CCAT PLugin",'ERROR')
 			#/write to latf
+
 
 			#search and write to files.
 			aofplist = [pref.ao_ex, pref.car_ex, pref.char_ex, pref.prop_ex]
@@ -240,7 +253,8 @@ class OT_write(bpy.types.Operator):
 					msgbox("Error: preferences points to" + bpy.path.basename(i) + "which is not a excel file", "CCAT Plugin", 'ERROR')
 					print ("Error: preferences points to" + bpy.path.basename(i) + "which is not a excel file")
 					continue
-				#bug here. runs all code even after continue is suppost to jump to next itteration
+				#bug here. runs all code even after continue is suppost to jump to next itteration 
+					#bug not currently observed?
 				print (i)
 
 				aoexcel = openpyxl.load_workbook(i)
@@ -256,19 +270,20 @@ class OT_write(bpy.types.Operator):
 
 				col = (str(aojson["id"]))[0]
 				
-				celldic = cellinfo(col,int((str(aojson["id"]))[1:]), 150, aosheet)
+				celldic = cellinfo(col,int((str(aojson["id"]))[1:]), 300, aosheet)
+					#required: dynamic upper limit based on break of 3-5 empty cells
 
 				if vid in celldic:
 					row = (str(celldic[vid]))[1:] #results in row from id found in dictionary
 					aosheet[(str(aojson["sof"+vteam]))[0] + row] = bpy.context.scene.my_enum_items.sofenum
 					#current problem: dic only returns asset, doesnt support ma asset, later func needed (if statment checking m asset and replacing variables?)
-
 					aoexcel.save(bpy.path.abspath(i))
 					aoexcel.close()
 					print("ccal: printed to", aofplist , "at row", row)
 					break
 				else:
 					print ("ccat: Did not find cell in", i)
+					aoexcel.close()
 					
 		else:
 			print("ccat: scene file, not yet supported")
@@ -388,33 +403,46 @@ class CCAT_PT_PrefPanel(bpy.types.AddonPreferences):
 		# col.scale_y = 2
 		# col.operator("wm.url_open","Open webpage ").url=addon_updater_ops.updater.website
 
+@persistent
+def writeonsave(self, context):
+	print("script test function has been called")
+	return {bpy.ops.ccat.write()}
+	#throwing '''TypeError: unhashable type: 'set'''' for some reason, but it works
 
 classes = (
 	#DemoPreferences,
 	OBJECT_PT_DemoUpdaterPanel,
 	MyEnumItems,
+	OT_write,
 	OT_copylatf,
 	CCAT_PT_PrimPanel,
 	CCAT_PT_PrefPanel,
-	OT_write,
 	OT_TestOP
 
 )
 
 
+
+
 def register():
+
+	bpy.app.handlers.save_post.append(writeonsave)
 	# addon updater code and configurations
 	# in case of broken version, try to register the updater first
 	# so that users can revert back to a working version
 	addon_updater_ops.register(bl_info)
+	
+
 
 	# register the example panel, to show updater buttons
 	for cls in classes:
 		addon_updater_ops.make_annotations(cls) # to avoid blender 2.8 warnings
 		bpy.utils.register_class(cls)
+	
 
 
 def unregister():
+	bpy.app.handlers.save_post.remove(writeonsave)
 	# addon updater unregister
 	addon_updater_ops.unregister()
 
