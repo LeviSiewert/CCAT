@@ -189,8 +189,8 @@ class OT_write(bpy.types.Operator):
 			elif  filename[0].lower() == "asset":
 				#file is of the finished asset type, team is later overwritten/created by the dropdown menu
 				#needs work
-				filetype = "fin" if bpy.context.scene.my_enum_items.teamenum == 'def' else bpy.context.scene.my_enum_items.teamenum
-				vteam = "tex"
+				filetype = "fin"
+				vteam = "tex" if bpy.context.scene.my_enum_items.teamenum == 'def' else bpy.context.scene.my_enum_items.teamenum
 				vatype = filename[0].lower()
 				vtype = filename[1].lower()
 				vclass = filename[2].lower()
@@ -278,20 +278,27 @@ class OT_write(bpy.types.Operator):
 				with open(jsonname) as json_file:
 					aojson = json.load(json_file)
 
-
-				col = (str(aojson["id"]))[0]
+				if vatype.lower() == "masset":
+					col = (str(aojson["maid"]))[0]
+				else:
+					col = (str(aojson["id"]))[0]
 				
-				celldic = cellinfo(col,int((str(aojson["id"]))[1:]), 300, aosheet)
+				celldic = cellinfo(col,int((str(aojson["id"]))[1:]), 300, aosheet, vatype)
 					#required: dynamic upper limit based on break of 3-5 empty cells
+					#current problem: celldic only returns asset, doesnt support masset, change collum
 
-				if vid in celldic:
+				if vatype.lower() != "masset" and vid in celldic:
 					row = (str(celldic[vid]))[1:] #results in row from id found in dictionary
 					aosheet[(str(aojson["sof"+vteam]))[0] + row] = bpy.context.scene.my_enum_items.sofenum
-					#current problem: dic only returns asset, doesnt support ma asset, later func needed (if statment checking m asset and replacing variables?)
+					
 					aoexcel.save(bpy.path.abspath(i))
 					aoexcel.close()
 					print("ccal: printed to", aofplist , "at row", row)
 					break
+				elif vatype.lower() == "masset" and vid in celldic:
+					aosheet[(str(aojson["sofla"]))[0] + row] = bpy.context.scene.my_enum_items.sofenum
+					
+
 				else:
 					print ("ccat: Did not find cell in", i)
 					aoexcel.close()
@@ -318,7 +325,6 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 		layout.prop(context.scene.my_enum_items, "la_ex", text="local Asset excel")
 		if bpy.context.scene.my_enum_items.la_ex == '':
 			layout.operator("ccat.copylatf")
-
 
 
 
