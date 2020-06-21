@@ -20,7 +20,7 @@ bl_info = {
 	"name":        "CCAT",
 	"description": "Crow Creations Tracking addon",
 	"author":      "Levi Siewert",
-	"version":     (0, 5, 0),
+	"version":     (0, 5, 1),
 	"blender":     (2, 80, 0),
 	"location":    "View 3D > Tool Shelf > CCAT",
 	"warning":     "",  # used for warning icon and text in addons panel
@@ -363,7 +363,7 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 		layout = self.layout
 
 		row = layout.row()
-		row.label(text="Mode: Asset")
+		row.label(text="Mode: Asset/Masset")
 		
 		layout.prop(context.scene.my_enum_items, "teamenum")
 		layout.prop(context.scene.my_enum_items, "sofenum")
