@@ -1,1 +1,1 @@
-{"index": 0, "fname": "b8", "team": "c8", "artist": "d8", "vnum": "e8", "sof": "f8", "an": "g8", "softex": "j3", "sofmod": "k3", "sofrig": "l3", "sofanim": "m3", "sofli": "n3", "glsof": "g3"}
+{"index": 0, "dat": "a8", "fname": "b8", "team": "c8", "artist": "d8", "vnum": "e8", "sof": "f8", "an": "g8", "softex": "j3", "sofmod": "k3", "sofrig": "l3", "sofanim": "m3", "sofli": "n3", "glsof": "g3"}
