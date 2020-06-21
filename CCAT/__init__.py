@@ -44,7 +44,9 @@ import ensurepip
 import datetime
 import shutil
 import ctypes
+from .pack import openpyxl
 
+'''
 def msgbox(message="", title="Message Box", icon= 'INFO'):
 	def draw(self, context):
 		self.layout.label(text=message)
@@ -68,7 +70,8 @@ except ImportError:
 		import openpyxl
 	else:
 		msgbox("CCAT dependancy check failed, run blender as Administrator once to solve", "CCAT Plugin Error", "ERROR")
-		print("import module error, requires to run as admin")
+		# above statmement crashes blender on load, will rever to packageing module
+		print("import module error, requires to run as admin")'''
 
 
 # updater ops import, all setup in this file
@@ -298,13 +301,13 @@ class OT_write(bpy.types.Operator):
 			for i in aofplist:
 
 				if os.path.isdir(i):
-					msgbox("Error: preferences points to directory not excel file", "CCAT Plugin", 'ERROR')
-					print("Error: preferences points to directory not excel file")
+					msgbox("Error: CCAT addon preferences points to directory not excel file", "CCAT Plugin", 'ERROR')
+					print("Error: CCAT addon preferences points to directory not excel file")
 					continue
 
 				if i.lower().endswith(".xlsx") == False:
-					msgbox("Error: preferences points to" + bpy.path.basename(i) + "which is not a excel file", "CCAT Plugin", 'ERROR')
-					print ("Error: preferences points to" + bpy.path.basename(i) + "which is not a excel file")
+					msgbox("Error: CCAT addon preferences points to" + bpy.path.basename(i) + "which is not a excel file", "CCAT Plugin", 'ERROR')
+					print ("Error: CCAT addon preferences points to" + bpy.path.basename(i) + "which is not a excel file")
 					continue
 				#bug here. runs all code even after continue is suppost to jump to next itteration 
 					#bug not currently observed?
