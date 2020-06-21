@@ -84,7 +84,10 @@ class MyEnumItems(bpy.types.PropertyGroup):
 	def unregister(cls):
 		del bpy.types.Scene.my_enum_items
 
-
+	CCATwritebool : BoolProperty(
+		name="Enable or Disable CCAT",
+		description="Enable or Disable CCAT",
+		default = True)
 	sofenum : bpy.props.EnumProperty(
 		name="S.O.F.",
 		description="sofenum",
@@ -366,7 +369,7 @@ class CCAT_PT_PrimPanel(bpy.types.Panel):
 		layout.prop(context.scene.my_enum_items, "sofenum")
 		layout.prop(context.scene.my_enum_items, "la_ex", text="latf")
 		layout.prop(context.scene.my_enum_items, "artistnote", text="Note")
-		
+		layout.prop(context.scene.my_enum_items, "CCATwritebool", text="CCAT write to excel")
 		if bpy.context.scene.my_enum_items.la_ex == '':
 			
 			layout.operator("ccat.copylatf")
@@ -474,7 +477,8 @@ class CCAT_PT_PrefPanel(bpy.types.AddonPreferences):
 
 @persistent
 def writeonsave(self, context):
-	return {bpy.ops.ccat.write()}
+	if bpy.context.scene.my_enum_items.CCATwritebool == True:
+		return {bpy.ops.ccat.write()}
 	#throwing '''TypeError: unhashable type: 'set'''' for some reason, but it works
 
 classes = (
