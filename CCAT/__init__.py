@@ -209,7 +209,7 @@ class OT_write(bpy.types.Operator):
 	bl_idname = "ccat.write"
 	bl_label = "get variables from name"
 
-	#call this to assign variables to the scene 
+	
 	def execute(self, context):
 		#writeexcel(self, context)
 		basefilename = bpy.path.basename(bpy.context.blend_data.filepath)
@@ -260,7 +260,7 @@ class OT_write(bpy.types.Operator):
 				latfsheet = latfexcel.active
 
 				varnestedlist = [
-				["dat" , datetime.datetime.now()],
+				["dat" , datetime.datetime.today().date()],
 				["fname" ,  bpy.path.basename(bpy.context.blend_data.filepath)],
 				["artist" , pref.artistname],
 				["sof" , bpy.context.scene.my_enum_items.sofenum],
@@ -272,7 +272,10 @@ class OT_write(bpy.types.Operator):
 				for i in varnestedlist:
 					i.append(latfsheet[latfjson[i[0]]].value == i[1])
 
-				if not all([varnestedlist[1][2], varnestedlist[3][2], varnestedlist[4][2]]):
+				datevalue = latfsheet[latfjson["dat"]].value
+				samed = (datetime.datetime.today().date() == datevalue.date())
+
+				if not all([varnestedlist[1][2], varnestedlist[3][2], varnestedlist[4][2], varnestedlist[7][2], samed]):
 					latfsheet.insert_rows(8)
 					for i in varnestedlist:
 						latfsheet[latfjson[i[0]]] = i [1]
